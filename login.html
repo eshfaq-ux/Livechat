@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat App Login</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    h2 {
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: white;
+      padding: 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    p {
+      margin-top: 15px;
+      color: #555;
+    }
+
+    a {
+      color: #4caf50;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .success-message {
+      text-align: center;
+      display: none;
+      margin-top: 15px;
+      color: white;
+      text-align: center;
+      display: none;
+      border:2px solid #4caf50;
+      border-radius: 5px;
+      background-color: #4caf50;
+      padding:10px;
+      margin:5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+      
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+
+      <button type="submit" id="loginButton">Login</button>
+    </form>
+    <p>Don't have an account? <a href="registration.html">Register here</a></p>
+    <p id="successMessage" class="success-message">Login successful!</p>
+  </div>
+
+  <script type="module">
+    // Import the functional SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCFbrdi8aoVmRFUvnSCrXANE_ajW8ze-ho",
+      authDomain: "livechat-16624.firebaseapp.com",
+      projectId: "livechat-16624",
+      databaseUrl: "https://livechat-16624-default-rtdb.firebaseio.com/",
+      storageBucket: "livechat-16624.appspot.com",
+      messagingSenderId: "910982929241",
+      appId: "1:910982929241:web:b5fe667bb25e8edbb00a48"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Login logic
+    const loginForm = document.getElementById('loginForm');
+    const loginButton = document.getElementById('loginButton');
+    const successMessage = document.getElementById('successMessage');
+
+    loginButton.addEventListener('click', function (event) {
+      event.preventDefault();
+
+      const email = loginForm.email.value;
+      const password = loginForm.password.value;
+
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // User logged in successfully
+          const user = userCredential.user;
+          console.log(`User logged in: ${user.email}, UID: ${user.uid}`);
+
+          // Display success message
+          successMessage.style.display = 'block';
+
+          // Redirect to livechat.html 
+          setTimeout(() => {
+            window.location.href = 'livechat.html';
+          }, 3000);
+        })
+        .catch((error) => {
+          // Handle login errors
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.error(`Login error (${errorCode}): ${errorMessage}`);
+        });
+    });
+
+    // Check authentication state
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in
+        console.log("User is signed in:", user.uid);
+        // Redirect or perform actions after successful login
+      } else {
+        // User is signed out
+        console.log("User is signed out");
+      }
+    });
+  </script>
+
+</body>
+</html>

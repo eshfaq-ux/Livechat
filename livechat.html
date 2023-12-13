@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Chat</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #userListContainer {
+      width: 20%;
+      background-color: #ddd8e0;
+      color: #100f0f;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    #userListHeading {
+      padding: 10px;
+      box-sizing: border-box;
+      font-size: 28px;
+      font-weight: 300;
+      border-bottom: 1px solid rgb(237, 229, 237);
+      margin-left: -18px;
+      margin-right: 60px;
+      color:rgb(202, 212, 202);
+      background-color: #086155;
+      font-family:Arial, Helvetica, sans-serif;
+      text-align: center;
+      width:320px;
+      border-radius: 5px;
+      margin-top: 5px;
+    }
+
+    #userListItems li {
+      padding: 10px;
+      margin: 10px 12px;
+      box-sizing: border-box;
+      font-size: 18px;
+      font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+      list-style: none;
+      color: #2d6a8e;
+      background-color: rgb(249, 246, 246);
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .userListItem {
+      border-bottom: 5px solid #011714;
+    }
+
+    .userListItem:last-child {
+      border-bottom: none;
+    }
+
+    .userListItem:hover {
+      background-color: #128C7E;
+    }
+
+    #chatSection {
+      flex: 1;
+      background-color: rgb(114, 138, 152);
+      overflow-y: auto;
+      padding: 20px;
+      box-sizing: border-box;
+      transition: background-color 0.3s;
+    }
+
+    #usernameDisplay {
+      background-color: #086155;
+      color: rgb(212, 217, 224);
+      padding: 5px;
+      font-weight:bold;
+      font-size: 20px;
+      text-align: left;
+      border-radius: 8px;
+      border:1px solid rgb(106, 101, 106);
+      margin-left: -2px;
+      margin-top: 0;
+      font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana,
+        sans-serif;
+      transition: background-color 0.3s;
+      width:150px;
+    }
+
+    #messageContainer {
+      flex: 1;
+      overflow-y: auto;
+      height: 75%;
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      border: 2px solid #737777;
+      background: linear-gradient(rgba(54, 50, 54, 0.881)gba(187, 181, 186, 0.8));
+      margin-top: 2%;
+      transition: background-color 0.3s;
+      box-shadow:0em;
+    }
+
+    .incomingMessage,
+    .outgoingMessage {
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      max-width: 70%;
+      transition: background-color 0.3s;
+    }
+
+    .incomingMessage {
+      background-color: #eaf5f4;
+      align-self: flex-start;
+    }
+
+    .outgoingMessage {
+      background-color: #128C7E;
+      color: #fff;
+      align-self: flex-end;
+    }
+
+    #messageInputContainer {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      box-sizing: border-box;
+      margin-top: 1%;
+    }
+
+    #messageInput {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #128C7E;
+      border-radius: 8px;
+      margin-right: 10px;
+      font-size: 16px;
+      height: 50px;
+      margin-left: -10px;
+      margin-top: 5px;
+      transition: border-color 0.3s;
+    }
+
+    #sendButton {
+      background-color: #128C7E;
+      color: #f5f1f1;
+      border: none;
+      padding: 15px;
+      cursor: pointer;
+      border-radius: 5px;
+      height: 45px;
+      margin-right: 10px;
+      width: 8%;
+      font-size: 17px;
+      transition: background-color 0.3s;
+    }
+    
+
+    #sendButton:hover {
+      background-color: #075E54;
+    }
+
+    #chatSection:hover,
+    #usernameDisplay:hover,
+    #messageContainer:hover,
+    .incomingMessage:hover,
+    .outgoingMessage:hover,
+    #messageInput:hover,
+    #sendButton:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    #userDetails {
+      display: block;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    #noUserSelected {
+      font-style: italic;
+    }
+    .profileImage{
+      border-radius: 50%;
+      width: 50px;
+      float: left;
+      margin-left: 20px;
+      height: 50px;
+      background-color: white;
+    }
+    .profileImage2{
+      border-radius: 50%;
+      width: 30px;
+      float: left;
+      margin-right: 10px;
+      height: 30px;
+      background-color: white;
+    }
+  </style>
+</head>
+
+<body>
+
+
+  <div id="userListContainer">
+    <div id="userListHeading">
+      <img  id="profileImage" class="profileImage" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_XJdnC9AWDwo_M2g682nhZpAm0IxO3HxBk1VFHpY3qQ&s"/>
+      <label id="myName">My Name</label>
+    </div>
+    <ul id="userListItems">
+     
+    </ul>
+  </div>
+
+  <div id="chatSection">
+    <div id="usernameDisplay">Name</div>
+    <div id="messageContainer">
+
+      <div class="incomingMessage">Incoming message</div>
+      <div class="outgoingMessage">Outgoing message</div>
+      <div class="incomingMessage">Incoming message</div>
+      <div class="outgoingMessage">Outgoing message</div>
+      <div class="incomingMessage">Incoming message</div>
+      <div class="outgoingMessage">Outgoing message</div>
+      <div class="incomingMessage">Incoming message</div>
+      <div class="outgoingMessage">Outgoing message</div>
+
+    </div>
+    <div id="userDetails">
+      <ul id="userDetailsList"></ul>
+    </div>
+    <div id="messageInputContainer">
+      <input type="file" id="imageInput">
+      <input type="text" id="messageInput" placeholder="Type your message...">
+      <button id="sendButton">Send</button>
+    </div>
+  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+    var loggedInUser;
+    var selectedUserId;
+    var selectedConversationId="";
+  
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCFbrdi8aoVmRFUvnSCrXANE_ajW8ze-ho",
+      authDomain: "livechat-16624.firebaseapp.com",
+      projectId: "livechat-16624",
+      databaseUrl: "https://livechat-16624-default-rtdb.firebaseio.com/",
+      storageBucket: "livechat-16624.appspot.com",
+      messagingSenderId: "910982929241",
+      appId: "1:910982929241:web:b5fe667bb25e8edbb00a48"
+    };
+    // Firebase app is initialized
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+    document.getElementById("sendButton").addEventListener('click', () => {
+      var msg=document.getElementById("messageInput").value;
+      console.log(selectedUserId);
+      console.log(loggedInUser.uid);
+      if(selectedConversationId==""){
+        selectedConversationId=loggedInUser.uid+selectedUserId;
+      }
+      const msgRef = ref(database, 'Coversations/' + selectedConversationId+"/"+generateUniqueString());
+        console.log(msgRef)
+      set(msgRef, {
+        message: msg,
+        senderId: loggedInUser.uid,
+        receiverId: selectedUserId,
+      });
+        });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loggedInUser=user;
+        // Fetch the list of registered users from the database
+        const usersRef = ref(database, 'users');
+        onValue(usersRef, (snapshot) => {
+          const users = snapshot.val();
+          populateUserList(users);
+        });
+      } else {
+        // User is signed out
+        console.log("User is signed out");
+        // Redirect to the login page if not authenticated
+        window.location.href = "login.html";
+      }
+    });
+
+    function populateUserList(users) {
+      const userListItems = document.getElementById('userListItems');
+      userListItems.innerHTML = '';
+        
+      var html='';
+      // Populate user list    
+      for (const userId in users) {
+        const user = users[userId];
+        
+       if(userId!=loggedInUser.uid){
+        const listItem = document.createElement('li');
+        listItem.innerHTML='<img   class="profileImage2" src="'+user.profileImage+'"/>'+
+        '<label >'+user.displayName+'</label>';
+
+        listItem.setAttribute('data-user-id', userId);
+        listItem.addEventListener('click', () => {
+          selectedUserId=userId
+          displayUserDetails(user);
+        });
+        userListItems.appendChild(listItem);
+      }else{
+        document.getElementById("myName").innerHTML=user.displayName;
+        document.getElementById("profileImage").src=user.profileImage;
+      }
+      }
+     
+    }
+
+    function displayUserDetails(user) {
+      const userDetailsList = document.getElementById('userDetailsList');
+      const usernameDisplay = document.getElementById('usernameDisplay');
+      const conRef = ref(database, 'Coversations');
+     
+        onValue(conRef, (snapshot) => {
+          document.getElementById("messageInput").value="";
+          var conversations = snapshot.val();
+          for (var conversationId in conversations) {
+            if(conversationId.includes(loggedInUser.uid) && conversationId.includes(selectedUserId)){
+              var data='';
+              selectedConversationId=conversationId
+              for (var messageId in conversations[conversationId]) {
+                var msgObj = conversations[conversationId][messageId];
+            
+                var msg='';
+                if(msgObj.senderId==loggedInUser.uid){
+                  msg='<div class="outgoingMessage">'+msgObj.message+'</div>';
+                }else{
+                msg='<div class="incomingMessage">'+msgObj.message+'</div>';
+                }
+                data+=msg;
+              }
+              document.getElementById("messageContainer").innerHTML=data;
+            }
+          }
+        });
+      // // Display user details
+      // userDetailsList.innerHTML = `
+      //   // <li><strong></strong> ${user.displayName}</li>
+      // `;
+
+      // // Display the username at the top of the chat section
+      usernameDisplay.innerHTML = user.displayName;
+
+
+      // startChatButton.style.display = 'block';
+
+
+    }
+
+    function generateUniqueString() {
+      // Get the current timestamp
+      const timestamp = new Date().getTime();
+
+      // Generate a random string (you can use a library for a more robust solution)
+      const randomString = Math.random().toString(36).substring(2, 8);
+
+      // Combine timestamp and random string to create a unique string
+      const uniqueString = `${timestamp}${randomString}`;
+
+      return uniqueString;
+    }
+  </script>
+
+</body>
+
+</html>

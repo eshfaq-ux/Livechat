@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      color: #555;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #4caf50;
+      color: white;
+      padding: 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    p {
+      text-align: center;
+      margin-top: 15px;
+      color: #555;
+    }
+
+    a {
+      color: #4caf50;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .success-message {
+      color: white;
+      text-align: center;
+      display: none;
+      border: 2px solid #4caf50;
+      border-radius: 5px;
+      background-color: #4caf50;
+      padding: 10px;
+      margin: 5px;
+    }
+
+    #fileUploadContainer {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #fileUploadProgress {
+      display: none;
+      margin-top: 10px;
+      color: #4caf50;
+    }
+
+    #fileUploadProgressBar {
+      width: 0;
+      height: 10px;
+      background-color: #4caf50;
+      margin-top: 5px;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h2>Registration</h2>
+
+    <!-- File Upload Section -->
+    <div id="fileUploadContainer">
+      <label for="myFile">Choose a file:</label>
+      <input type="file" id="myFile" />
+      <button id="uploadButton">Upload</button>
+      <div id="fileUploadProgress">Uploading: <span id="fileUploadPercentage">0%</span></div>
+      <div id="fileUploadProgressBar"></div>
+    </div>
+
+    <!-- Registration Form -->
+    <form id="registrationForm">
+      <label for="displayName">Full Name:</label>
+      <input type="text" id="displayName" name="displayName" required>
+      <input type="text" id="imageUrl" name="imageUrl" required>
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+
+      <label for="confirmPassword">Confirm Password:</label>
+      <input type="password" id="confirmPassword" name="confirmPassword" required>
+
+      <button type="button" id="registerButton">Register</button>
+      <p id="successMessage" class="success-message">Registration successful! Redirecting to login page...</p>
+    </form>
+
+    <p>Already have an account? <a href="login.html">Login here</a></p>
+  </div>
+
+  <script type="module">
+    // Import the latest Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCFbrdi8aoVmRFUvnSCrXANE_ajW8ze-ho",
+      authDomain: "livechat-16624.firebaseapp.com",
+      projectId: "livechat-16624",
+      databaseUrl: "https://livechat-16624-default-rtdb.firebaseio.com/",
+      storageBucket: "livechat-16624.appspot.com",
+      messagingSenderId: "910982929241",
+      appId: "1:910982929241:web:b5fe667bb25e8edbb00a48"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+    const storage = getStorage(app);
+
+    // Registration logic
+    const registrationForm = document.getElementById('registrationForm');
+    const registerButton = document.getElementById('registerButton');
+    const successMessage = document.getElementById('successMessage');
+    const uploadButton = document.getElementById('uploadButton');
+
+    function Reguser() {
+      const email = registrationForm.email.value;
+      const password = registrationForm.password.value;
+      const displayName = registrationForm.displayName.value;
+      const username = registrationForm.username.value;
+      const profileImage = registrationForm.imageUrl.value;
+
+      if (password.length < 6) {
+        console.error('Password should be at least 6 characters long.');
+        return;
+      }
+
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // User registered successfully
+          const user = userCredential.user;
+
+          // Set the display name directly on the user object
+          user.displayName = displayName;
+
+          // Save user details to the database
+          const userRef = ref(database, 'users/' + user.uid);
+          set(userRef, {
+            displayName: displayName,
+            email: email,
+            username: username,
+            profileImage: profileImage,
+          });
+
+          console.log(`User registered: ${user.email}, Display Name: ${user.displayName}, Username: ${username}`);
+
+          // Display success message
+          successMessage.style.display = 'block';
+
+          // Redirect to login.html 
+          setTimeout(() => {
+            window.location.href = 'login.html';
+          }, 3000);
+        })
+        .catch((error) => {
+          // Handle registration errors
+          const errorCode = error.code;
+          const errorMessage = error.message;
+
+          if (errorCode === 'auth/weak-password') {
+            console.error('Password should be at least 6 characters long.');
+          } else {
+            console.error(`Registration error (${errorCode}): ${errorMessage}`);
+          }
+        });
+    }
+
+    registerButton.addEventListener('click', function () {
+      Reguser();
+    });
+
+    uploadButton.addEventListener('click', function () {
+      var fileInput = document.getElementById("myFile");
+      var file = fileInput.files[0];
+
+      if (!file) {
+        console.error('No file selected.');
+        alert("No File Selected ");
+        return;
+      }
+
+      var storageRef = sRef(storage, 'images/' + file.name);
+      var progressBar = document.getElementById("fileUploadProgressBar");
+      var progressText = document.getElementById("fileUploadPercentage");
+      var progressContainer = document.getElementById("fileUploadProgress");
+
+      progressContainer.style.display = 'block';
+
+      var uploadTask = uploadBytes(storageRef, file);
+
+      uploadTask.then((snapshot) => {
+        console.log('Upload complete!');
+        progressText.textContent = 'Upload complete!';
+
+        // Wait for a short time before hiding the progress bar
+        setTimeout(() => {
+          progressContainer.style.display = 'none';
+        }, 2000);
+
+        // Get download URL directly from the upload task
+        // Get the download URL of the uploaded file
+        getDownloadURL(storageRef).then(function (url) {
+          registrationForm.imageUrl.value = url;
+          console.log('File download URL:', url);
+        }).catch(function (error) {
+          console.error('Error getting download URL:', error);
+        });
+      }).catch((error) => {
+        console.error('Error uploading file: ', error);
+      });
+    });
+  </script>
+</body>
+
+</html>
